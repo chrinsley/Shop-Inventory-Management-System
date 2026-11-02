@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Django
+db.sqlite3
+media/
+
+# Next.js / Node
+node_modules/
+.next/
+out/
+
+# Environment variables
+.env.local
+.env.production
+
+# VS Code
+.vscode/
+
+# Operating system
+.DS_Store
+Thumbs.db
