@@ -53,18 +53,19 @@ class ProductViewSet(viewsets.ModelViewSet):
     @transaction.atomic
     def perform_create(self, serializer):
 
+        # Get the initial quantity entered by the user
         initial_stock = serializer.validated_data.pop(
             "initial_stock",
             0
         )
 
+        # Create the product
         product = serializer.save()
 
-        Inventory.objects.update_or_create(
+        # Create its inventory with the correct quantity
+        Inventory.objects.create(
             product=product,
-            defaults={
-                "quantity": initial_stock
-            }
+            quantity=initial_stock
         )
 
 

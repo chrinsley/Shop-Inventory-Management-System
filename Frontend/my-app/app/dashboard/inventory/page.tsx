@@ -26,6 +26,7 @@ export default function InventoryPage() {
       setError("");
 
       const response = await instance.get("api/inventory/");
+      // console.log("INVENTORY API RESPONSE:", response.data);
 
       setInventory(response.data.results || response.data);
     } catch (err) {
