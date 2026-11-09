@@ -26,7 +26,6 @@ export default function InventoryPage() {
       setError("");
 
       const response = await instance.get("api/inventory/");
-      // console.log("INVENTORY API RESPONSE:", response.data);
 
       setInventory(response.data.results || response.data);
     } catch (err) {
@@ -44,7 +43,6 @@ export default function InventoryPage() {
     fetchInventory();
   }, []);
 
-  // Increase or decrease stock
   async function handleStockUpdate(
     inventoryId: number,
     action: StockAction
@@ -61,7 +59,6 @@ export default function InventoryPage() {
         }
       );
 
-      // Update the inventory state without refreshing the page
       const updatedInventory: Inventory = response.data.inventory;
 
       setInventory((previousInventory) =>
@@ -103,62 +100,69 @@ export default function InventoryPage() {
 
   if (loading) {
     return (
-      <div className="p-8 text-center">
+      <div className="min-h-screen bg-slate-950 p-8 text-center text-slate-400">
         Loading inventory...
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
+    <main className="min-h-screen bg-slate-950 p-8 text-white">
+
       <div className="mx-auto max-w-6xl">
 
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-between">
+
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <p className="text-sm uppercase tracking-widest text-indigo-400">
+              Management
+            </p>
+
+            <h1 className="mt-2 text-3xl font-bold">
               Inventory Management
             </h1>
 
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-slate-400">
               Monitor and manage your product stock quantities.
             </p>
           </div>
 
           <button
             onClick={fetchInventory}
-            className="rounded-lg bg-gray-800 px-4 py-2 text-white hover:bg-gray-700"
+            className="rounded-xl bg-indigo-500 px-5 py-3 font-semibold text-white transition hover:bg-indigo-600"
           >
             Refresh
           </button>
+
         </div>
 
         {/* Error */}
         {error && (
-          <div className="mb-4 rounded-lg bg-red-100 p-4 text-red-700">
+          <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-red-400">
             {error}
           </div>
         )}
 
         {/* Statistics */}
-        <div className="mb-6 grid gap-4 sm:grid-cols-2">
+        <div className="mb-8 grid gap-4 sm:grid-cols-2">
 
-          <div className="rounded-xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+            <p className="text-sm text-slate-400">
               Total products tracked
             </p>
 
-            <p className="mt-2 text-3xl font-bold text-gray-900">
+            <p className="mt-3 text-3xl font-bold text-white">
               {inventory.length}
             </p>
           </div>
 
-          <div className="rounded-xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+            <p className="text-sm text-slate-400">
               Total stock quantity
             </p>
 
-            <p className="mt-2 text-3xl font-bold text-gray-900">
+            <p className="mt-3 text-3xl font-bold text-white">
               {totalStock}
             </p>
           </div>
@@ -166,70 +170,95 @@ export default function InventoryPage() {
         </div>
 
         {/* Inventory Table */}
-        <div className="overflow-hidden rounded-xl bg-white shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
 
-          <div className="border-b p-5">
-            <h2 className="text-xl font-semibold text-gray-900">
+          <div className="border-b border-slate-800 p-6">
+            <h2 className="text-lg font-semibold">
               Stock Overview
             </h2>
+
+            <p className="mt-1 text-sm text-slate-500">
+              View and update the current stock of your products.
+            </p>
           </div>
 
           {inventory.length === 0 ? (
-            <p className="p-8 text-center text-gray-500">
+            <p className="p-10 text-center text-slate-500">
               No inventory records found.
             </p>
           ) : (
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left">
 
-                <thead className="bg-gray-100 text-sm text-gray-600">
+              <table className="w-full">
+
+                <thead className="bg-slate-950">
                   <tr>
-                    <th className="p-4">Product ID</th>
-                    <th className="p-4">Product</th>
-                    <th className="p-4">Quantity</th>
-                    <th className="p-4">Last Updated</th>
-                    <th className="p-4">Manage Stock</th>
+
+                    <th className="px-6 py-4 text-left text-sm text-slate-400">
+                      Product ID
+                    </th>
+
+                    <th className="px-6 py-4 text-left text-sm text-slate-400">
+                      Product
+                    </th>
+
+                    <th className="px-6 py-4 text-left text-sm text-slate-400">
+                      Quantity
+                    </th>
+
+                    <th className="px-6 py-4 text-left text-sm text-slate-400">
+                      Last Updated
+                    </th>
+
+                    <th className="px-6 py-4 text-left text-sm text-slate-400">
+                      Manage Stock
+                    </th>
+
                   </tr>
                 </thead>
 
                 <tbody>
+
                   {inventory.map((item) => (
 
                     <tr
                       key={item.id}
-                      className="border-t hover:bg-gray-50"
+                      className="border-t border-slate-800 transition hover:bg-slate-800/40"
                     >
 
-                      <td className="p-4 font-medium text-gray-900">
-  {item.product}
-</td>
+                      <td className="px-6 py-4 font-medium text-slate-300">
+                        #{item.product}
+                      </td>
 
-                      <td className="p-4 font-medium text-gray-900">
+                      <td className="px-6 py-4 font-medium text-white">
                         {item.product_name}
                       </td>
 
                       {/* Quantity */}
-                      <td className="p-4">
+                      <td className="px-6 py-4">
+
                         <span
-                          className={`rounded-full px-3 py-1 text-sm font-medium ${
+                          className={`rounded-full px-3 py-1 text-xs font-medium ${
                             item.quantity === 0
-                              ? "bg-red-100 text-red-700"
+                              ? "bg-red-500/10 text-red-400"
                               : item.quantity <= 5
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-green-100 text-green-700"
+                              ? "bg-yellow-500/10 text-yellow-400"
+                              : "bg-green-500/10 text-green-400"
                           }`}
                         >
                           {item.quantity}
                         </span>
+
                       </td>
 
-                      <td className="p-4 text-sm text-gray-500">
+                      {/* Last Updated */}
+                      <td className="px-6 py-4 text-sm text-slate-400">
                         {new Date(item.updated_at).toLocaleString()}
                       </td>
 
                       {/* Increase / Decrease */}
-                      <td className="p-4">
+                      <td className="px-6 py-4">
 
                         <div className="flex items-center gap-3">
 
@@ -243,7 +272,7 @@ export default function InventoryPage() {
                               item.quantity === 0
                             }
                             title="Decrease stock"
-                            className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100 text-lg font-bold text-red-700 transition hover:bg-red-200 disabled:cursor-not-allowed disabled:opacity-40"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10 text-lg font-bold text-red-400 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-40"
                           >
                             −
                           </button>
@@ -255,13 +284,13 @@ export default function InventoryPage() {
                             }
                             disabled={updatingId === item.id}
                             title="Increase stock"
-                            className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-100 text-lg font-bold text-green-700 transition hover:bg-green-200 disabled:cursor-not-allowed disabled:opacity-40"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-500/10 text-lg font-bold text-green-400 transition hover:bg-green-500/20 disabled:cursor-not-allowed disabled:opacity-40"
                           >
                             +
                           </button>
 
                           {updatingId === item.id && (
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-slate-500">
                               Updating...
                             </span>
                           )}
@@ -273,15 +302,18 @@ export default function InventoryPage() {
                     </tr>
 
                   ))}
+
                 </tbody>
 
               </table>
+
             </div>
           )}
 
         </div>
 
       </div>
+
     </main>
   );
 }
