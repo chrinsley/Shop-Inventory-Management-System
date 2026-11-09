@@ -1,6 +1,9 @@
-from django.db import models
+from django.db import models, transaction
 from django.core.validators import MinValueValidator
 from decimal import Decimal
+
+from django.db.models import F
+from django.core.exceptions import ValidationError
 
 
 class Category(models.Model):
@@ -116,6 +119,75 @@ class Inventory(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.quantity}"
+
+    @transaction.atomic
+    def increase_stock(self, amount):
+
+        if amount <= 0:
+            raise ValidationError(
+                "Amount must be greater than zero."
+            )
+
+        Inventory.objects.filter(pk=self.pk).update(
+            quantity=F("quantity") + amount
+        )
+
+        self.refresh_from_db()
+
+    @transaction.atomic
+    def decrease_stock(self, amount):
+
+        if amount <= 0:
+            raise ValidationError(
+                "Amount must be greater than zero."
+            )
+
+        updated = Inventory.objects.filter(
+            pk=self.pk,
+            quantity__gte=amount
+        ).update(
+            quantity=F("quantity") - amount
+        )
+
+        if not updated:
+            raise ValidationError(
+                "Insufficient stock to decrease."
+            )
+
+        self.refresh_from_db()
+
+# class StockMovement(models.Model):
+
+#     class MovementType(models.TextChoices):
+#         STOCK_IN = "STOCK_IN", "Stock In"
+#         STOCK_OUT = "STOCK_OUT", "Stock Out"
+#         RETURN = "RETURN", "Return"
+#         DAMAGE = "DAMAGE", "Damage"
+#         ADJUSTMENT = "ADJUSTMENT", "Adjustment"
+
+#     product = models.ForeignKey(
+#         Product,
+#         on_delete=models.PROTECT,
+#         related_name="stock_movements"
+#     )
+
+#     movement_type = models.CharField(
+#         max_length=20,
+#         choices=MovementType.choices
+#     )
+
+#     quantity = models.PositiveIntegerField()
+
+#     notes = models.TextField(blank=True)
+
+#     created_at = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         return (
+#             f"{self.product.name} - "
+#             f"{self.movement_type} - "
+#             f"{self.quantity}"
+#         )
 
 
 # class Purchase(models.Model):

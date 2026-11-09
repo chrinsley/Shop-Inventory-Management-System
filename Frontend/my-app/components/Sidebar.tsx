@@ -4,31 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const menuItems = [
-  {
-    name: "Dashboard",
-    href: "/dashboard",
-    icon: "▦",
-  },
-  {
-    name: "Categories",
-    href: "/dashboard/categories",
-    icon: "▤",
-  },
-  {
-    name: "Products",
-    href: "/dashboard/products",
-    icon: "□",
-  },
-  {
-    name: "Suppliers",
-    href: "/dashboard/suppliers",
-    icon: "♙",
-  },
-  {
-    name: "AI Assistant",
-    href: "/dashboard/AI_Chabot",
-    icon: "✦",
-  },
+  { name: "Dashboard", href: "/dashboard", icon: "▦", color: "text-blue-400" },
+  { name: "Categories", href: "/dashboard/categories", icon: "▤", color: "text-purple-400" },
+  { name: "Products", href: "/dashboard/products", icon: "□", color: "text-green-400" },
+  { name: "Inventory", href: "/dashboard/inventory", icon: "📦", color: "text-orange-400" },
+  { name: "Suppliers", href: "/dashboard/suppliers", icon: "♙", color: "text-pink-400" },
+  { name: "AI Assistant", href: "/dashboard/AI_Chabot", icon: "✦", color: "text-yellow-400" },
 ];
 
 export default function Sidebar() {
@@ -63,7 +44,9 @@ export default function Sidebar() {
                     : "text-slate-400 hover:bg-slate-900 hover:text-white"
                 }`}
               >
-                <span>{item.icon}</span>
+                <span className={`text-xl ${item.color}`}>
+  {item.icon}
+</span>
                 {item.name}
               </Link>
             );

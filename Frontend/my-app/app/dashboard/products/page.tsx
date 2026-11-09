@@ -23,7 +23,7 @@ interface Product {
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-
+  const [initialStock, setInitialStock] = useState("0");
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
@@ -54,46 +54,59 @@ export default function ProductsPage() {
   }, []);
 
   async function addProduct() {
-    if (
-      !name ||
-      !category ||
-      !purchasePrice ||
-      !sellingPrice
-    ) {
-      alert("Please fill in all required fields.");
-      return;
-    }
 
-    if (Number(sellingPrice) < Number(purchasePrice)) {
-      alert(
-        "Selling price cannot be lower than purchase price."
-      );
-      return;
-    }
+  if (
+    !name ||
+    !category ||
+    !purchasePrice ||
+    !sellingPrice
+  ) {
+    alert("Please fill in all required fields.");
+    return;
+  }
 
-    try {
-      await instance.post("/api/products/", {
-        category: Number(category),
-        name,
-        description,
-        purchase_price: purchasePrice,
-        selling_price: sellingPrice,
-        minimum_stock: Number(minimumStock),
-      });
-    } catch (error) {
-      console.error(error);
-      setName("");
-      setCategory("");
-      setDescription("");
-      setPurchasePrice("");
-      setSellingPrice("");
-      setMinimumStock("5");
+  if (Number(sellingPrice) < Number(purchasePrice)) {
+    alert("Selling price cannot be lower than purchase price.");
+    return;
+  }
 
-      loadData();
-      alert("Could not create product.");
-    }
+  try {
+
+    await instance.post("/api/products/", {
+
+      category: Number(category),
+      name,
+      description,
+      purchase_price: purchasePrice,
+      selling_price: sellingPrice,
+      minimum_stock: Number(minimumStock),
+
+      // Initial inventory quantity
+      initial_stock: Number(initialStock),
+
+    });
+
+    // Reset form after successful creation
+    setName("");
+    setCategory("");
+    setDescription("");
+    setPurchasePrice("");
+    setSellingPrice("");
+    setMinimumStock("5");
+    setInitialStock("0");
+
+    // Reload products
+    await loadData();
+
+    alert("Product created successfully.");
+
+  } catch (error) {
+
+    console.error(error);
+    alert("Could not create product.");
 
   }
+}
 
   async function deleteProduct(id: number) {
     const confirmed = window.confirm(
@@ -208,6 +221,16 @@ export default function ProductsPage() {
             onChange={(e) => setMinimumStock(e.target.value)}
             placeholder="Minimum stock"
             min="0"
+            className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500"
+          />
+
+          <input
+            type="number"
+            value={initialStock}
+            onChange={(e) => setInitialStock(e.target.value)}
+            placeholder="Initial stock quantity"
+            min="0"
+            step="1"
             className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500"
           />
 

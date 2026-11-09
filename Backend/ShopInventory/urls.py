@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import CategoryViewSet, ProductViewSet, SupplierViewSet, AiConversation, gemini
+from .views import CategoryViewSet, InventoryListAPIView, ProductViewSet, SupplierViewSet, AiConversation, gemini, UpdateInventoryStockAPIView
 
 from rest_framework import routers
 
@@ -13,5 +13,17 @@ urlpatterns = router.urls
 
 urlpatterns += [
     path('ai-conversation/', AiConversation, name='ai-conversation'),  
-    path('gemini/', gemini, name='gemini')
+    path('gemini/', gemini, name='gemini'),
+     path(
+        "inventory/",
+        InventoryListAPIView.as_view(),
+        name="inventory-list",
+    ),
+
+    # POST increase/decrease stock
+    path(
+        "inventory/<int:pk>/update-stock/",
+        UpdateInventoryStockAPIView.as_view(),
+        name="update-inventory-stock",
+    ),
 ]

@@ -1,14 +1,26 @@
 from rest_framework.decorators import api_view
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
+from django.db import transaction
 from django.db.models import Value
 from django.db.models.functions import Coalesce
-from .models import Category, Product, Supplier
+from django.shortcuts import get_object_or_404
+from django.core.exceptions import ValidationError as DjangoValidationError
+from rest_framework.generics import ListAPIView
+
+from .serializer import InventorySerializer, StockUpdateSerializer
+
+
+from .models import Category, Product, Supplier, Inventory
 from .serializer import (
     CategorySerializer,
     ProductSerializer,
     SupplierSerializer,
+    InventorySerializer,
+    StockUpdateSerializer
 )
+from rest_framework.views import APIView
+from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.response import Response
 from google import genai
@@ -34,8 +46,26 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 
 class ProductViewSet(viewsets.ModelViewSet):
+
     queryset = Product.objects.select_related("category").all()
     serializer_class = ProductSerializer
+
+    @transaction.atomic
+    def perform_create(self, serializer):
+
+        initial_stock = serializer.validated_data.pop(
+            "initial_stock",
+            0
+        )
+
+        product = serializer.save()
+
+        Inventory.objects.update_or_create(
+            product=product,
+            defaults={
+                "quantity": initial_stock
+            }
+        )
 
 
 class SupplierViewSet(viewsets.ModelViewSet):
@@ -43,6 +73,58 @@ class SupplierViewSet(viewsets.ModelViewSet):
     queryset = Supplier.objects.all()
     serializer_class = SupplierSerializer
 
+
+class InventoryListAPIView(ListAPIView):
+    queryset = Inventory.objects.select_related("product").all()
+    serializer_class = InventorySerializer
+   
+
+class UpdateInventoryStockAPIView(APIView):
+
+   
+
+    def post(self, request, pk):
+
+        # 1. Retrieve inventory
+        inventory = get_object_or_404(
+            Inventory,
+            pk=pk
+        )
+
+        # 2. Validate request data
+        serializer = StockUpdateSerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(raise_exception=True)
+
+        action = serializer.validated_data["action"]
+        amount = serializer.validated_data["amount"]
+
+        try:
+
+            # 3. Increase or decrease stock
+            if action == "INCREASE":
+
+                inventory.increase_stock(amount)
+
+            elif action == "DECREASE":
+
+                inventory.decrease_stock(amount)
+
+            # 4. Return updated inventory
+            return Response({
+                "message": "Inventory updated successfully.",
+                "inventory": InventorySerializer(
+                    inventory
+                ).data
+            }, status=status.HTTP_200_OK)
+
+        except DjangoValidationError as e:
+
+            raise ValidationError({
+                "error": e.messages
+            })
 
 # ── Database context helpers ──────────────────────────────────────────────────
 
